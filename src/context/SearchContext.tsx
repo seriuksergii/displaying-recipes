@@ -1,16 +1,27 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 
-const SearchContext = createContext({
+interface SearchResult {
+  idMeal: string;
+  strMeal: string;
+  strMealThumb: string;
+  strCategory: string;
+  strArea: string;
+}
+
+type SearchContextType = {
+  searchResults: SearchResult[];
+  setSearchResults: (results: SearchResult[]) => void;
+};
+
+const SearchContext = createContext<SearchContextType>({
   searchResults: [],
-  setSearchResults: (results) => {},
+  setSearchResults: () => {},
 });
 
 export const useSearch = () => useContext(SearchContext);
 
-import { ReactNode } from 'react';
-
 export const SearchProvider = ({ children }: { children: ReactNode }) => {
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
 
   return (
     <SearchContext.Provider value={{ searchResults, setSearchResults }}>
