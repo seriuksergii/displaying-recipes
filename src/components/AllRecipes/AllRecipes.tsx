@@ -1,6 +1,4 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
@@ -8,82 +6,34 @@ import { useSearch } from '../../context/SearchContext';
 import Loader from '../Loader/Loader';
 import Layout from '../Layout/Layout';
 import { IoMdClose } from 'react-icons/io';
-
-interface Meal {
-  idMeal: string;
-  strMeal: string;
-  strMealThumb: string;
-  strCategory: string;
-  strArea: string;
-}
+import useRecipes from '../../hooks/useRecipes';
+import usePagination from '../../hooks/usePagination';
+import useFavorites from '../../hooks/useFavorites';
 
 interface AllRecipesProps {
   isStandalone?: boolean;
 }
 
 const AllRecipes = ({ isStandalone = false }: AllRecipesProps) => {
-  const { category } = useParams<{ category: string }>();
-  const [meals, setMeals] = useState<Meal[]>([]);
-  const [favorites, setFavorites] = useState<string[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(12);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const { meals, loading, error, category } = useRecipes();
   const { searchResults } = useSearch();
+  const { favorites, updateFavorites } = useFavorites(); 
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchMealsByCategory = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const url = category
-          ? `https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`
-          : 'https://www.themealdb.com/api/json/v1/1/search.php?s=';
-        const response = await axios.get(url);
-        setMeals(response.data.meals || []);
-      } catch (error) {
-        console.error('Failed to fetch meals:', error);
-        setError('Failed to fetch meals. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMealsByCategory();
-  }, [category]);
-
-  useEffect(() => {
-    const storedFavorites = JSON.parse(
-      localStorage.getItem('favorites') || '[]'
-    );
-    setFavorites(storedFavorites);
-  }, []);
-
-  const updateFavorites = (idMeal: string) => {
-    const updatedFavorites = favorites.includes(idMeal)
-      ? favorites.filter((mealId) => mealId !== idMeal)
-      : [...favorites, idMeal];
-
-    setFavorites(updatedFavorites);
-    localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
-    window.dispatchEvent(new Event('storage'));
-  };
+  const { currentPage, totalPages, handlePageChange } = usePagination(
+    searchResults?.length > 0 ? searchResults.length : meals.length,
+    12
+  );
 
   const handleRecipeClick = (id: string) => navigate(`/recipe/${id}`);
   const handleClose = () => navigate('/');
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const indexOfLastItem = currentPage * 12;
+  const indexOfFirstItem = indexOfLastItem - 12;
   const currentItems =
-    searchResults.length > 0
-      ? searchResults
+    searchResults?.length > 0
+      ? searchResults.slice(indexOfFirstItem, indexOfLastItem)
       : meals.slice(indexOfFirstItem, indexOfLastItem);
-
-  const handlePageChange = (
-    _event: React.ChangeEvent<unknown>,
-    value: number
-  ) => setCurrentPage(value);
 
   const content = (
     <div className="allRecipesPage py-8 relative">
@@ -144,13 +94,13 @@ const AllRecipes = ({ isStandalone = false }: AllRecipesProps) => {
           ))}
         </div>
 
-        {searchResults.length === 0 && (
+        {!searchResults?.length && (
           <div className="flex justify-center mt-8">
             <Stack spacing={2}>
               <Pagination
-                count={Math.ceil(meals.length / itemsPerPage)}
+                count={totalPages}
                 page={currentPage}
-                onChange={handlePageChange}
+                onChange={(_event, value) => handlePageChange(value)}
                 shape="rounded"
                 variant="outlined"
                 showFirstButton
