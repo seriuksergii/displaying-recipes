@@ -1,16 +1,13 @@
-import AllRecipes from '../components/AllRecipes/AllRecipes';
-import Footer from '../components/Footer/Footer';
-import Header from '../components/Header/Header';
+import Layout from '../components/Layout/Layout';
 import HomeCatSlider from '../components/HomeCatSlider/HomeCatSlider';
+import AllRecipes from '../components/AllRecipes/AllRecipes';
 
 const HomePage = () => {
   return (
-    <div>
-      <Header />
+    <Layout>
       <HomeCatSlider />
       <AllRecipes />
-      <Footer />
-    </div>
+    </Layout>
   );
 };
 

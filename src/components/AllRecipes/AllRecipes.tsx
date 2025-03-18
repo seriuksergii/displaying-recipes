@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaHeart, FaRegHeart, FaTimes } from 'react-icons/fa';
+import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
 import { useSearch } from '../../context/SearchContext';
 import Loader from '../Loader/Loader';
+import Layout from '../Layout/Layout';
+import { IoMdClose } from 'react-icons/io';
 
 interface Meal {
   idMeal: string;
@@ -15,7 +17,11 @@ interface Meal {
   strArea: string;
 }
 
-const AllRecipes = () => {
+interface AllRecipesProps {
+  isStandalone?: boolean;
+}
+
+const AllRecipes = ({ isStandalone = false }: AllRecipesProps) => {
   const { category } = useParams<{ category: string }>();
   const [meals, setMeals] = useState<Meal[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -48,7 +54,9 @@ const AllRecipes = () => {
   }, [category]);
 
   useEffect(() => {
-    const storedFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    const storedFavorites = JSON.parse(
+      localStorage.getItem('favorites') || '[]'
+    );
     setFavorites(storedFavorites);
   }, []);
 
@@ -56,7 +64,7 @@ const AllRecipes = () => {
     const updatedFavorites = favorites.includes(idMeal)
       ? favorites.filter((mealId) => mealId !== idMeal)
       : [...favorites, idMeal];
-    
+
     setFavorites(updatedFavorites);
     localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
     window.dispatchEvent(new Event('storage'));
@@ -67,24 +75,30 @@ const AllRecipes = () => {
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = searchResults.length > 0 ? searchResults : meals.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems =
+    searchResults.length > 0
+      ? searchResults
+      : meals.slice(indexOfFirstItem, indexOfLastItem);
 
-  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => setCurrentPage(value);
+  const handlePageChange = (
+    _event: React.ChangeEvent<unknown>,
+    value: number
+  ) => setCurrentPage(value);
 
-  return (
+  const content = (
     <div className="allRecipesPage py-8 relative">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-6 relative">
           <h2 className="text-2xl font-bold">
-            {category ? `Recipes in ${category}` : 'Best recipes for your family'}
+            {category
+              ? `Recipes in ${category}`
+              : 'Best recipes for your family'}
           </h2>
           {category && (
-            <button
+            <IoMdClose
               onClick={handleClose}
-              className="bg-gray-300 hover:bg-gray-200 text-gray-600 rounded-full p-2 transition-colors cursor-pointer flex items-center justify-center"
-            >
-              <FaTimes className="h-6 w-6" />
-            </button>
+              className="absolute right-1 top-3 cursor-pointer h-7 w-7"
+            />
           )}
         </div>
 
@@ -119,7 +133,8 @@ const AllRecipes = () => {
               <div className="p-4">
                 <h3 className="text-lg font-semibold mb-2">{meal.strMeal}</h3>
                 <p className="text-sm text-gray-600 mb-1">
-                  <span className="font-medium">Category:</span> {meal.strCategory}
+                  <span className="font-medium">Category:</span>{' '}
+                  {meal.strCategory}
                 </p>
                 <p className="text-sm text-gray-600">
                   <span className="font-medium">Area:</span> {meal.strArea}
@@ -147,6 +162,8 @@ const AllRecipes = () => {
       </div>
     </div>
   );
+
+  return isStandalone ? <Layout>{content}</Layout> : content;
 };
 
 export default AllRecipes;

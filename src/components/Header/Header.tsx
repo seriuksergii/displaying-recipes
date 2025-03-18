@@ -28,7 +28,7 @@ const Header = () => {
       setFavoritesCount(favoriteIds.length);
     };
 
-    updateFavoritesCount(); 
+    updateFavoritesCount();
 
     window.addEventListener('storage', updateFavoritesCount);
 
@@ -51,7 +51,7 @@ const Header = () => {
               <ul className="flex items-center gap-4">
                 <li className="list-none">
                   <Link
-                    to="/help-center"
+                    to="#"
                     className="text-[14px] font-[500] link"
                   >
                     Help Center
@@ -87,14 +87,14 @@ const Header = () => {
             <div className="flex items-center justify-end gap-3 w-full">
               <li className="list-none">
                 <Link
-                  to="/login"
+                  to="#"
                   className="link transition text-[16px] font-[500] link"
                 >
                   Login
                 </Link>{' '}
                 | &nbsp;
                 <Link
-                  to="/register"
+                  to="#"
                   className="link transition text-[16px] font-[500] link"
                 >
                   Register

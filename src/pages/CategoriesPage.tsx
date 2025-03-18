@@ -1,30 +1,29 @@
 import { useEffect, useState } from 'react';
 import { get_categories } from '../api/api';
 import Loader from '../components/Loader/Loader';
+import Layout from '../components/Layout/Layout';
+
+interface Category {
+  idCategory: string;
+  strCategory: string;
+  strCategoryThumb: string;
+  strCategoryDescription: string;
+}
 
 const CategoriesPage = () => {
-  const [categories, setCategories] = useState<
-    {
-      idCategory: string;
-      strCategory: string;
-      strCategoryThumb: string;
-      strCategoryDescription: string;
-    }[]
-  >([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchCategories = async () => {
     try {
       const data = await get_categories();
-      console.log('Fetched Categories:', data);
       if (Array.isArray(data)) {
         setCategories(data);
       } else {
         setCategories([]);
       }
-    } catch (err) {
-      console.error('Failed to fetch categories:', err);
+    } catch {
       setError('Failed to fetch categories');
     } finally {
       setLoading(false);
@@ -35,16 +34,11 @@ const CategoriesPage = () => {
     fetchCategories();
   }, []);
 
-  if (loading)
-    return (
-      <div>
-        <Loader />
-      </div>
-    );
+  if (loading) return <Loader />;
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div>
+    <Layout>
       <h1>Категорії</h1>
       <ul>
         {categories.map((category) => (
@@ -59,7 +53,7 @@ const CategoriesPage = () => {
           </li>
         ))}
       </ul>
-    </div>
+    </Layout>
   );
 };
 

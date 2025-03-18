@@ -12,7 +12,10 @@ const App = () => {
       <Router>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/category/:category" element={<AllRecipes />} />
+          <Route
+            path="/category/:category"
+            element={<AllRecipes isStandalone={true} />}
+          />
           <Route path="/recipe/:id" element={<RecipeDetailsPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
         </Routes>
